@@ -1,17 +1,13 @@
-[![Stability: Maintenance](https://masterminds.github.io/stability/maintenance.svg)](https://masterminds.github.io/stability/maintenance.html)
-### Squirrel is "complete".
-Bug fixes will still be merged (slowly). Bug reports are welcome, but I will not necessarily respond to them. If another fork (or substantially similar project) actively improves on what Squirrel does, let me know and I may link to it here.
-
+> **Note**
+> This is a fork of [Masterminds/squirrel](https://github.com/Masterminds/squirrel).
 
 # Squirrel - fluent SQL generator for Go
 
 ```go
-import "github.com/Masterminds/squirrel"
+import "github.com/userhubdev/squirrel"
 ```
 
-
-[![GoDoc](https://godoc.org/github.com/Masterminds/squirrel?status.png)](https://godoc.org/github.com/Masterminds/squirrel)
-[![Build Status](https://api.travis-ci.org/Masterminds/squirrel.svg?branch=master)](https://travis-ci.org/Masterminds/squirrel)
+[![GoDoc](https://pkg.go.dev/badge/github.com/userhubdev/squirrel)](https://pkg.go.dev/github.com/userhubdev/squirrel)
 
 **Squirrel is not an ORM.** For an application of Squirrel, check out
 [structable, a table-struct mapper](https://github.com/Masterminds/structable)
@@ -20,7 +16,7 @@ import "github.com/Masterminds/squirrel"
 Squirrel helps you build SQL queries from composable parts:
 
 ```go
-import sq "github.com/Masterminds/squirrel"
+import sq "github.com/userhubdev/squirrel"
 
 users := sq.Select("*").From("users").Join("emails USING (email_id)")
 
