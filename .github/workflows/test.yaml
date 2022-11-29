@@ -12,6 +12,23 @@ jobs:
     name: Squirrel
     runs-on: ubuntu-20.04
 
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: squirrel
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_DB: squirrel
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -24,4 +41,19 @@ jobs:
 
       - name: Test
         run: |
-          go test ./...
+          go test
+
+      - name: Integration (sqlite3)
+        run: |
+          CGO_ENABLED=1 go test -args -driver sqlite3
+        working-directory: integration
+
+      - name: Integration (mysql)
+        run: |
+          go test -args -driver mysql -dataSource root:root@/squirrel
+        working-directory: integration
+
+      - name: Integration (postgres)
+        run: |
+          go test -args -driver postgres -dataSource 'postgres://postgres:postgres@127.0.0.1/squirrel?sslmode=disable'
+        working-directory: integration
