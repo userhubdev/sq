@@ -195,18 +195,58 @@ func TestSelectWithOptions(t *testing.T) {
 	assert.Equal(t, "SELECT DISTINCT SQL_NO_CACHE * FROM foo", sql)
 }
 
-func TestSelectWithRemoveLimit(t *testing.T) {
-	sql, _, err := Select("*").From("foo").Limit(10).RemoveLimit().ToSql()
+func TestSelectWithRemove(t *testing.T) {
+	builder := Select("*").From("foo")
 
-	assert.NoError(t, err)
-	assert.Equal(t, "SELECT * FROM foo", sql)
-}
+	tests := []struct {
+		name    string
+		builder SelectBuilder
+	}{
+		{
+			name:    "Prefixes",
+			builder: builder.Prefix("foo").RemovePrefixes(),
+		},
+		{
+			name:    "Joins",
+			builder: builder.Join("foo").RemoveJoins(),
+		},
+		{
+			name:    "Where",
+			builder: builder.Where("1 = 2").RemoveWhere(),
+		},
+		{
+			name:    "GroupBy",
+			builder: builder.GroupBy("foo").RemoveGroupBy(),
+		},
+		{
+			name:    "Having",
+			builder: builder.Having("1 = 1").RemoveHaving(),
+		},
+		{
+			name:    "OrderBy",
+			builder: builder.OrderBy("foo").RemoveOrderBy(),
+		},
+		{
+			name:    "Limit",
+			builder: builder.Limit(10).RemoveLimit(),
+		},
+		{
+			name:    "Offset",
+			builder: builder.Offset(10).RemoveOffset(),
+		},
+		{
+			name:    "Suffixes",
+			builder: builder.Suffix("foo").RemoveSuffixes(),
+		},
+	}
 
-func TestSelectWithRemoveOffset(t *testing.T) {
-	sql, _, err := Select("*").From("foo").Offset(10).RemoveOffset().ToSql()
-
-	assert.NoError(t, err)
-	assert.Equal(t, "SELECT * FROM foo", sql)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			s, _, err := test.builder.ToSql()
+			assert.NoError(t, err)
+			assert.Equal(t, "SELECT * FROM foo", s)
+		})
+	}
 }
 
 func TestSelectBuilderNestedSelectDollar(t *testing.T) {

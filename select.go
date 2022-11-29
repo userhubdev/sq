@@ -238,6 +238,11 @@ func (b SelectBuilder) Prefix(sql string, args ...interface{}) SelectBuilder {
 	return b.PrefixExpr(Expr(sql, args...))
 }
 
+// RemovePrefixes removes prefixes.
+func (b SelectBuilder) RemovePrefixes() SelectBuilder {
+	return builder.Delete(b, "Prefixes").(SelectBuilder)
+}
+
 // PrefixExpr adds an expression to the very beginning of the query
 func (b SelectBuilder) PrefixExpr(expr Sqlizer) SelectBuilder {
 	return builder.Append(b, "Prefixes", expr).(SelectBuilder)
@@ -272,7 +277,8 @@ func (b SelectBuilder) RemoveColumns() SelectBuilder {
 // Column adds a result column to the query.
 // Unlike Columns, Column accepts args which will be bound to placeholders in
 // the columns string, for example:
-//   Column("IF(col IN ("+squirrel.Placeholders(3)+"), 1, 0) as col", 1, 2, 3)
+//
+//	Column("IF(col IN ("+squirrel.Placeholders(3)+"), 1, 0) as col", 1, 2, 3)
 func (b SelectBuilder) Column(column interface{}, args ...interface{}) SelectBuilder {
 	return builder.Append(b, "Columns", newPart(column, args...)).(SelectBuilder)
 }
@@ -292,6 +298,11 @@ func (b SelectBuilder) FromSelect(from SelectBuilder, alias string) SelectBuilde
 // JoinClause adds a join clause to the query.
 func (b SelectBuilder) JoinClause(pred interface{}, args ...interface{}) SelectBuilder {
 	return builder.Append(b, "Joins", newPart(pred, args...)).(SelectBuilder)
+}
+
+// RemoveJoins removes JOIN clauses.
+func (b SelectBuilder) RemoveJoins() SelectBuilder {
+	return builder.Delete(b, "Joins").(SelectBuilder)
 }
 
 // Join adds a JOIN clause to the query.
@@ -346,9 +357,19 @@ func (b SelectBuilder) Where(pred interface{}, args ...interface{}) SelectBuilde
 	return builder.Append(b, "WhereParts", newWherePart(pred, args...)).(SelectBuilder)
 }
 
+// RemoveWhere removes WHERE clause.
+func (b SelectBuilder) RemoveWhere() SelectBuilder {
+	return builder.Delete(b, "WhereParts").(SelectBuilder)
+}
+
 // GroupBy adds GROUP BY expressions to the query.
 func (b SelectBuilder) GroupBy(groupBys ...string) SelectBuilder {
 	return builder.Extend(b, "GroupBys", groupBys).(SelectBuilder)
+}
+
+// RemoveGroupBy removes GROUP BY clause.
+func (b SelectBuilder) RemoveGroupBy() SelectBuilder {
+	return builder.Delete(b, "GroupBys").(SelectBuilder)
 }
 
 // Having adds an expression to the HAVING clause of the query.
@@ -356,6 +377,11 @@ func (b SelectBuilder) GroupBy(groupBys ...string) SelectBuilder {
 // See Where.
 func (b SelectBuilder) Having(pred interface{}, rest ...interface{}) SelectBuilder {
 	return builder.Append(b, "HavingParts", newWherePart(pred, rest...)).(SelectBuilder)
+}
+
+// RemoveHaving removes HAVING clause.
+func (b SelectBuilder) RemoveHaving() SelectBuilder {
+	return builder.Delete(b, "HavingParts").(SelectBuilder)
 }
 
 // OrderByClause adds ORDER BY clause to the query.
@@ -372,12 +398,17 @@ func (b SelectBuilder) OrderBy(orderBys ...string) SelectBuilder {
 	return b
 }
 
+// RemoveOrderBy removes ORDER BY clause.
+func (b SelectBuilder) RemoveOrderBy() SelectBuilder {
+	return builder.Delete(b, "OrderByParts").(SelectBuilder)
+}
+
 // Limit sets a LIMIT clause on the query.
 func (b SelectBuilder) Limit(limit uint64) SelectBuilder {
 	return builder.Set(b, "Limit", fmt.Sprintf("%d", limit)).(SelectBuilder)
 }
 
-// Limit ALL allows to access all records with limit
+// RemoveLimit removes LIMIT clause.
 func (b SelectBuilder) RemoveLimit() SelectBuilder {
 	return builder.Delete(b, "Limit").(SelectBuilder)
 }
@@ -395,6 +426,11 @@ func (b SelectBuilder) RemoveOffset() SelectBuilder {
 // Suffix adds an expression to the end of the query
 func (b SelectBuilder) Suffix(sql string, args ...interface{}) SelectBuilder {
 	return b.SuffixExpr(Expr(sql, args...))
+}
+
+// RemoveSuffixes removes suffixes.
+func (b SelectBuilder) RemoveSuffixes() SelectBuilder {
+	return builder.Delete(b, "Suffixes").(SelectBuilder)
 }
 
 // SuffixExpr adds an expression to the end of the query
