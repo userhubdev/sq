@@ -182,7 +182,14 @@ func (eq Eq) toSQL(useNotOpr bool) (sql string, args []interface{}, err error) {
 		if val == nil {
 			expr = fmt.Sprintf("%s %s NULL", key, nullOpr)
 		} else {
-			if isListType(val) {
+			if p, ok := val.(Sqlizer); ok {
+				pSql, pArgs, err := p.ToSql()
+				if err != nil {
+					return "", nil, err
+				}
+				expr = fmt.Sprintf("%s %s %s", key, equalOpr, pSql)
+				args = append(args, pArgs...)
+			} else if isListType(val) {
 				valVal := reflect.ValueOf(val)
 				if valVal.Len() == 0 {
 					expr = inEmptyExpr
@@ -240,7 +247,14 @@ func (lk Like) toSql(opr string) (sql string, args []interface{}, err error) {
 			err = fmt.Errorf("cannot use null with like operators")
 			return
 		} else {
-			if isListType(val) {
+			if p, ok := val.(Sqlizer); ok {
+				pSql, pArgs, err := p.ToSql()
+				if err != nil {
+					return "", nil, err
+				}
+				expr = fmt.Sprintf("%s %s %s", key, opr, pSql)
+				args = append(args, pArgs...)
+			} else if isListType(val) {
 				err = fmt.Errorf("cannot use array or slice with like operators")
 				return
 			} else {
@@ -320,12 +334,20 @@ func (lt Lt) toSql(opposite, orEq bool) (sql string, args []interface{}, err err
 			err = fmt.Errorf("cannot use null with less than or greater than operators")
 			return
 		}
-		if isListType(val) {
+		if p, ok := val.(Sqlizer); ok {
+			pSql, pArgs, err := p.ToSql()
+			if err != nil {
+				return "", nil, err
+			}
+			expr = fmt.Sprintf("%s %s %s", key, opr, pSql)
+			args = append(args, pArgs...)
+		} else if isListType(val) {
 			err = fmt.Errorf("cannot use array or slice with less than or greater than operators")
 			return
+		} else {
+			expr = fmt.Sprintf("%s %s ?", key, opr)
+			args = append(args, val)
 		}
-		expr = fmt.Sprintf("%s %s ?", key, opr)
-		args = append(args, val)
 
 		exprs = append(exprs, expr)
 	}

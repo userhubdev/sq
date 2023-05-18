@@ -59,6 +59,27 @@ func TestEqInToSql(t *testing.T) {
 	assert.Equal(t, expectedArgs, args)
 }
 
+func TestEqSqlizeToSql(t *testing.T) {
+	b := Eq{"id": Expr("test + ?", 1)}
+	sql, args, err := b.ToSql()
+	assert.NoError(t, err)
+
+	expectedSql := "id = test + ?"
+	assert.Equal(t, expectedSql, sql)
+
+	expectedArgs := []interface{}{1}
+	assert.Equal(t, expectedArgs, args)
+
+	b = Eq{"id": Expr("test")}
+	sql, args, err = b.ToSql()
+	assert.NoError(t, err)
+
+	expectedSql = "id = test"
+	assert.Equal(t, expectedSql, sql)
+
+	assert.Empty(t, args)
+}
+
 func TestNotEqToSql(t *testing.T) {
 	b := NotEq{"id": 1}
 	sql, args, err := b.ToSql()
@@ -125,6 +146,18 @@ func TestLtToSql(t *testing.T) {
 	assert.NoError(t, err)
 
 	expectedSql := "id < ?"
+	assert.Equal(t, expectedSql, sql)
+
+	expectedArgs := []interface{}{1}
+	assert.Equal(t, expectedArgs, args)
+}
+
+func TestLtSqlizeToSql(t *testing.T) {
+	b := Lt{"id": Expr("test + ?", 1)}
+	sql, args, err := b.ToSql()
+	assert.NoError(t, err)
+
+	expectedSql := "id < test + ?"
 	assert.Equal(t, expectedSql, sql)
 
 	expectedArgs := []interface{}{1}
@@ -343,6 +376,18 @@ func TestLikeToSql(t *testing.T) {
 	assert.NoError(t, err)
 
 	expectedSql := "name LIKE ?"
+	assert.Equal(t, expectedSql, sql)
+
+	expectedArgs := []interface{}{"%irrel"}
+	assert.Equal(t, expectedArgs, args)
+}
+
+func TestLikeSqlizeToSql(t *testing.T) {
+	b := Like{"name": Expr("CONCAT(test, ?)", "%irrel")}
+	sql, args, err := b.ToSql()
+	assert.NoError(t, err)
+
+	expectedSql := "name LIKE CONCAT(test, ?)"
 	assert.Equal(t, expectedSql, sql)
 
 	expectedArgs := []interface{}{"%irrel"}
