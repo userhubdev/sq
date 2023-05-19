@@ -188,6 +188,40 @@ func TestSelectBuilderNestedSelectJoin(t *testing.T) {
 	assert.Equal(t, args, expectedArgs)
 }
 
+func TestSelectBuilderParamJoinOn(t *testing.T) {
+	expectedSql := "SELECT * FROM bar JOIN baz ON bar.foo = baz.foo AND baz.foo = ?"
+	expectedArgs := []interface{}{42}
+
+	b := Select("*").From("bar").JoinOn("baz", Eq{
+		"bar.foo": Expr("baz.foo"),
+		"baz.foo": 42,
+	})
+
+	sql, args, err := b.ToSql()
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedSql, sql)
+	assert.Equal(t, args, expectedArgs)
+}
+
+func TestSelectBuilderNestedSelectJoinOn(t *testing.T) {
+
+	expectedSql := "SELECT * FROM bar JOIN ( SELECT * FROM baz WHERE foo = ? ) r ON bar.foo = r.foo"
+	expectedArgs := []interface{}{42}
+
+	nestedSelect := Select("*").From("baz").Where("foo = ?", 42)
+
+	b := Select("*").From("bar").JoinOn(nestedSelect.Prefix("(").Suffix(") r"), Eq{
+		"bar.foo": Expr("r.foo"),
+	})
+
+	sql, args, err := b.ToSql()
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedSql, sql)
+	assert.Equal(t, args, expectedArgs)
+}
+
 func TestSelectWithOptions(t *testing.T) {
 	sql, _, err := Select("*").From("foo").Distinct().Options("SQL_NO_CACHE").ToSql()
 
