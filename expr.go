@@ -61,7 +61,7 @@ func (e expr) ToSql() (sql string, args []interface{}, err error) {
 
 		if as, ok := ap[0].(Sqlizer); ok {
 			// sqlizer argument; expand it and append the result
-			isql, iargs, err = as.ToSql()
+			isql, iargs, err = nestedToSql(as)
 			buf.WriteString(sp[:i])
 			buf.WriteString(isql)
 			args = append(args, iargs...)
@@ -89,7 +89,7 @@ func (ce concatExpr) ToSql() (sql string, args []interface{}, err error) {
 		case string:
 			sql += p
 		case Sqlizer:
-			pSql, pArgs, err := p.ToSql()
+			pSql, pArgs, err := nestedToSql(p)
 			if err != nil {
 				return "", nil, err
 			}
@@ -126,7 +126,7 @@ func Alias(expr Sqlizer, alias string) aliasExpr {
 }
 
 func (e aliasExpr) ToSql() (sql string, args []interface{}, err error) {
-	sql, args, err = e.expr.ToSql()
+	sql, args, err = nestedToSql(e.expr)
 	if err == nil {
 		sql = fmt.Sprintf("(%s) AS %s", sql, e.alias)
 	}
@@ -183,7 +183,7 @@ func (eq Eq) toSQL(useNotOpr bool) (sql string, args []interface{}, err error) {
 			expr = fmt.Sprintf("%s %s NULL", key, nullOpr)
 		} else {
 			if p, ok := val.(Sqlizer); ok {
-				pSql, pArgs, err := p.ToSql()
+				pSql, pArgs, err := nestedToSql(p)
 				if err != nil {
 					return "", nil, err
 				}
@@ -248,7 +248,7 @@ func (lk Like) toSql(opr string) (sql string, args []interface{}, err error) {
 			return
 		} else {
 			if p, ok := val.(Sqlizer); ok {
-				pSql, pArgs, err := p.ToSql()
+				pSql, pArgs, err := nestedToSql(p)
 				if err != nil {
 					return "", nil, err
 				}
@@ -335,7 +335,7 @@ func (lt Lt) toSql(opposite, orEq bool) (sql string, args []interface{}, err err
 			return
 		}
 		if p, ok := val.(Sqlizer); ok {
-			pSql, pArgs, err := p.ToSql()
+			pSql, pArgs, err := nestedToSql(p)
 			if err != nil {
 				return "", nil, err
 			}

@@ -330,6 +330,36 @@ func (b SelectBuilder) CrossJoin(join string, rest ...interface{}) SelectBuilder
 	return b.JoinClause("CROSS JOIN "+join, rest...)
 }
 
+// joinOn adds a join on clause to the query
+func (b SelectBuilder) joinOn(prefix string, join interface{}, on Sqlizer) SelectBuilder {
+	return b.JoinClause(ConcatExpr(prefix, " ", join, " ON ", on))
+}
+
+// JoinOn adds a JOIN ON clause to the query.
+func (b SelectBuilder) JoinOn(join interface{}, on Sqlizer) SelectBuilder {
+	return b.joinOn("JOIN", join, on)
+}
+
+// LeftJoinOn adds a LEFT JOIN ON clause to the query.
+func (b SelectBuilder) LeftJoinOn(join interface{}, on Sqlizer) SelectBuilder {
+	return b.joinOn("LEFT JOIN", join, on)
+}
+
+// RightJoinOn adds a RIGHT JOIN ON clause to the query.
+func (b SelectBuilder) RightJoinOn(join interface{}, on Sqlizer) SelectBuilder {
+	return b.joinOn("RIGHT JOIN", join, on)
+}
+
+// InnerJoinOn adds a INNER JOIN ON clause to the query.
+func (b SelectBuilder) InnerJoinOn(join interface{}, on Sqlizer) SelectBuilder {
+	return b.joinOn("INNER JOIN", join, on)
+}
+
+// CrossJoinOn adds a CROSS JOIN ON clause to the query.
+func (b SelectBuilder) CrossJoinOn(join interface{}, on Sqlizer) SelectBuilder {
+	return b.joinOn("CROSS JOIN", join, on)
+}
+
 // Where adds an expression to the WHERE clause of the query.
 //
 // Expressions are ANDed together in the generated SQL.
