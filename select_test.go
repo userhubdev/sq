@@ -204,16 +204,16 @@ func TestSelectBuilderParamJoinOn(t *testing.T) {
 	assert.Equal(t, args, expectedArgs)
 }
 
-func TestSelectBuilderNestedSelectJoinOn(t *testing.T) {
+func TestSelectBuilderParamJoinSelect(t *testing.T) {
+	expectedSql := "SELECT * FROM (SELECT a FROM bar) AS x JOIN (SELECT b FROM baz WHERE y.b = ?) AS y ON x.id = y.id WHERE x.a = ?"
+	expectedArgs := []interface{}{42, 100}
 
-	expectedSql := "SELECT * FROM bar JOIN ( SELECT * FROM baz WHERE foo = ? ) r ON bar.foo = r.foo"
-	expectedArgs := []interface{}{42}
-
-	nestedSelect := Select("*").From("baz").Where("foo = ?", 42)
-
-	b := Select("*").From("bar").JoinOn(nestedSelect.Prefix("(").Suffix(") r"), Eq{
-		"bar.foo": Expr("r.foo"),
-	})
+	b := Select("*").
+		FromSelect(Select("a").From("bar"), "x").
+		JoinSelect(Select("b").From("baz").Where(Eq{"y.b": 42}), "y", Eq{
+			"x.id": Expr("y.id"),
+		}).
+		Where(Eq{"x.a": 100})
 
 	sql, args, err := b.ToSql()
 	assert.NoError(t, err)
