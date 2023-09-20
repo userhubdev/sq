@@ -330,7 +330,12 @@ func (b SelectBuilder) CrossJoin(join string, rest ...interface{}) SelectBuilder
 	return b.JoinClause("CROSS JOIN "+join, rest...)
 }
 
-// joinOn adds a join on clause to the query
+// FullJoin adds a FULL JOIN clause to the query.
+func (b SelectBuilder) FullJoin(join string, rest ...interface{}) SelectBuilder {
+	return b.JoinClause("FULL JOIN "+join, rest...)
+}
+
+// joinOn adds a join on clause to the query,
 func (b SelectBuilder) joinOn(prefix string, join interface{}, on Sqlizer) SelectBuilder {
 	return b.JoinClause(ConcatExpr(prefix, " ", join, " ON ", on))
 }
@@ -358,6 +363,41 @@ func (b SelectBuilder) InnerJoinOn(join interface{}, on Sqlizer) SelectBuilder {
 // CrossJoinOn adds a CROSS JOIN ON clause to the query.
 func (b SelectBuilder) CrossJoinOn(join interface{}, on Sqlizer) SelectBuilder {
 	return b.joinOn("CROSS JOIN", join, on)
+}
+
+// FullJoinOn adds a FULL JOIN ON clause to the query.
+func (b SelectBuilder) FullJoinOn(join interface{}, on Sqlizer) SelectBuilder {
+	return b.joinOn("FULL JOIN", join, on)
+}
+
+// JoinSelect adds a JOIN ON clause to the query.
+func (b SelectBuilder) JoinSelect(join SelectBuilder, alias string, on Sqlizer) SelectBuilder {
+	return b.JoinOn(Alias(join.PlaceholderFormat(Question), alias), on)
+}
+
+// LeftJoinSelect adds a LEFT JOIN ON clause to the query.
+func (b SelectBuilder) LeftJoinSelect(join SelectBuilder, alias string, on Sqlizer) SelectBuilder {
+	return b.LeftJoinOn(Alias(join.PlaceholderFormat(Question), alias), on)
+}
+
+// RightJoinSelect adds a RIGHT JOIN ON clause to the query.
+func (b SelectBuilder) RightJoinSelect(join SelectBuilder, alias string, on Sqlizer) SelectBuilder {
+	return b.RightJoinOn(Alias(join.PlaceholderFormat(Question), alias), on)
+}
+
+// InnerJoinSelect adds a INNER JOIN ON clause to the query.
+func (b SelectBuilder) InnerJoinSelect(join SelectBuilder, alias string, on Sqlizer) SelectBuilder {
+	return b.InnerJoinOn(Alias(join.PlaceholderFormat(Question), alias), on)
+}
+
+// CrossJoinSelect adds a CROSS JOIN ON clause to the query.
+func (b SelectBuilder) CrossJoinSelect(join SelectBuilder, alias string, on Sqlizer) SelectBuilder {
+	return b.CrossJoinOn(Alias(join.PlaceholderFormat(Question), alias), on)
+}
+
+// FullJoinSelect adds a FULL JOIN ON clause to the query.
+func (b SelectBuilder) FullJoinSelect(join SelectBuilder, alias string, on Sqlizer) SelectBuilder {
+	return b.FullJoinOn(Alias(join.PlaceholderFormat(Question), alias), on)
 }
 
 // Where adds an expression to the WHERE clause of the query.
