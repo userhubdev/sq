@@ -1,6 +1,6 @@
 package squirrel
 
-import "github.com/lann/builder"
+import "github.com/userhubdev/squirrel/internal/builder"
 
 // StatementBuilderType is the type of StatementBuilder.
 type StatementBuilderType builder.Builder

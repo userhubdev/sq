@@ -7,10 +7,17 @@ on:
     paths-ignore:
       - "**.md"
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   squirrel:
     name: Squirrel
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ["1.20", "1.21", "1.22"]
 
     services:
       mysql:
@@ -31,13 +38,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
-          go-version: "1.19"
-          cache: true
+          go-version: ${{ matrix.go-version }}
 
       - name: Test
         run: |

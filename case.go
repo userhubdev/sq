@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/lann/builder"
+	"github.com/userhubdev/squirrel/internal/builder"
 )
 
 func init() {

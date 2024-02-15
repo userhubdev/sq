@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/lann/builder"
 	"github.com/stretchr/testify/assert"
+	"github.com/userhubdev/squirrel/internal/builder"
 )
 
 func TestStatementBuilder(t *testing.T) {

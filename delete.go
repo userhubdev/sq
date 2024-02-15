@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/lann/builder"
+	"github.com/userhubdev/squirrel/internal/builder"
 )
 
 type deleteData struct {
