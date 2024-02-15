@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/lann/builder"
+	"github.com/userhubdev/squirrel/internal/builder"
 )
 
 // Sqlizer is the interface that wraps the ToSql method.

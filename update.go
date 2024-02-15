@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/lann/builder"
+	"github.com/userhubdev/squirrel/internal/builder"
 )
 
 type updateData struct {

@@ -1,12 +1,10 @@
-// +build go1.8
-
 package squirrel
 
 import (
 	"context"
 	"database/sql"
 
-	"github.com/lann/builder"
+	"github.com/userhubdev/squirrel/internal/builder"
 )
 
 func (d *deleteData) ExecContext(ctx context.Context) (sql.Result, error) {
