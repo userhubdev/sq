@@ -3,7 +3,7 @@ package squirrel
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDeleteBuilderToSql(t *testing.T) {
@@ -17,21 +17,21 @@ func TestDeleteBuilderToSql(t *testing.T) {
 		Suffix("RETURNING ?", 4)
 
 	sql, args, err := b.ToSql()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expectedSql :=
 		"WITH prefix AS ? " +
 			"DELETE FROM a WHERE b = ? ORDER BY c LIMIT 2 OFFSET 3 " +
 			"RETURNING ?"
-	assert.Equal(t, expectedSql, sql)
+	require.Equal(t, expectedSql, sql)
 
-	expectedArgs := []interface{}{0, 1, 4}
-	assert.Equal(t, expectedArgs, args)
+	expectedArgs := []any{0, 1, 4}
+	require.Equal(t, expectedArgs, args)
 }
 
 func TestDeleteBuilderToSqlErr(t *testing.T) {
 	_, _, err := Delete("").ToSql()
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func TestDeleteBuilderMustSql(t *testing.T) {
@@ -47,10 +47,10 @@ func TestDeleteBuilderPlaceholders(t *testing.T) {
 	b := Delete("test").Where("x = ? AND y = ?", 1, 2)
 
 	sql, _, _ := b.PlaceholderFormat(Question).ToSql()
-	assert.Equal(t, "DELETE FROM test WHERE x = ? AND y = ?", sql)
+	require.Equal(t, "DELETE FROM test WHERE x = ? AND y = ?", sql)
 
 	sql, _, _ = b.PlaceholderFormat(Dollar).ToSql()
-	assert.Equal(t, "DELETE FROM test WHERE x = $1 AND y = $2", sql)
+	require.Equal(t, "DELETE FROM test WHERE x = $1 AND y = $2", sql)
 }
 
 func TestDeleteBuilderRunners(t *testing.T) {
@@ -59,15 +59,16 @@ func TestDeleteBuilderRunners(t *testing.T) {
 
 	expectedSql := "DELETE FROM test WHERE x = ?"
 
-	b.Exec()
-	assert.Equal(t, expectedSql, db.LastExecSql)
+	_, err := b.Exec()
+	require.NoError(t, err)
+	require.Equal(t, expectedSql, db.LastExecSql)
 }
 
 func TestDeleteBuilderNoRunner(t *testing.T) {
 	b := Delete("test")
 
 	_, err := b.Exec()
-	assert.Equal(t, RunnerNotSet, err)
+	require.Equal(t, RunnerNotSet, err)
 }
 
 func TestDeleteWithQuery(t *testing.T) {
@@ -75,7 +76,8 @@ func TestDeleteWithQuery(t *testing.T) {
 	b := Delete("test").Where("id=55").Suffix("RETURNING path").RunWith(db)
 
 	expectedSql := "DELETE FROM test WHERE id=55 RETURNING path"
-	b.Query()
+	_, err := b.Query()
+	require.NoError(t, err)
 
-	assert.Equal(t, expectedSql, db.LastQuerySql)
+	require.Equal(t, expectedSql, db.LastQuerySql)
 }

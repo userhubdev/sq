@@ -31,7 +31,7 @@ func RegisterType(builderType reflect.Type, structType reflect.Type) *reflect.Va
 //
 // Returns an empty instance of the registered builder type which can be used
 // as the initial value for builder expressions. See example.
-func Register(builderProto, structProto interface{}) interface{} {
+func Register(builderProto, structProto any) any {
 	empty := RegisterType(
 		reflect.TypeOf(builderProto),
 		reflect.TypeOf(structProto),

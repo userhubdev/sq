@@ -3,7 +3,7 @@ package squirrel
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCaseWithVal(t *testing.T) {
@@ -17,7 +17,7 @@ func TestCaseWithVal(t *testing.T) {
 		From("table")
 	sql, args, err := qb.ToSql()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expectedSql := "SELECT CASE number " +
 		"WHEN 1 THEN one " +
@@ -25,10 +25,10 @@ func TestCaseWithVal(t *testing.T) {
 		"ELSE ? " +
 		"END " +
 		"FROM table"
-	assert.Equal(t, expectedSql, sql)
+	require.Equal(t, expectedSql, sql)
 
-	expectedArgs := []interface{}{"big number"}
-	assert.Equal(t, expectedArgs, args)
+	expectedArgs := []any{"big number"}
+	require.Equal(t, expectedArgs, args)
 }
 
 func TestCaseWithComplexVal(t *testing.T) {
@@ -40,16 +40,16 @@ func TestCaseWithComplexVal(t *testing.T) {
 		From("table")
 	sql, args, err := qb.ToSql()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expectedSql := "SELECT (CASE ? > ? " +
 		"WHEN true THEN 'T' " +
 		"END) AS complexCase " +
 		"FROM table"
-	assert.Equal(t, expectedSql, sql)
+	require.Equal(t, expectedSql, sql)
 
-	expectedArgs := []interface{}{10, 5}
-	assert.Equal(t, expectedArgs, args)
+	expectedArgs := []any{10, 5}
+	require.Equal(t, expectedArgs, args)
 }
 
 func TestCaseWithNoVal(t *testing.T) {
@@ -60,7 +60,7 @@ func TestCaseWithNoVal(t *testing.T) {
 	qb := Select().Column(caseStmt).From("table")
 	sql, args, err := qb.ToSql()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expectedSql := "SELECT CASE " +
 		"WHEN x = ? THEN x is zero " +
@@ -68,10 +68,10 @@ func TestCaseWithNoVal(t *testing.T) {
 		"END " +
 		"FROM table"
 
-	assert.Equal(t, expectedSql, sql)
+	require.Equal(t, expectedSql, sql)
 
-	expectedArgs := []interface{}{0, 1, 2}
-	assert.Equal(t, expectedArgs, args)
+	expectedArgs := []any{0, 1, 2}
+	require.Equal(t, expectedArgs, args)
 }
 
 func TestCaseWithExpr(t *testing.T) {
@@ -82,7 +82,7 @@ func TestCaseWithExpr(t *testing.T) {
 	qb := Select().Column(caseStmt).From("table")
 	sql, args, err := qb.ToSql()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expectedSql := "SELECT CASE x = ? " +
 		"WHEN true THEN ? " +
@@ -90,10 +90,10 @@ func TestCaseWithExpr(t *testing.T) {
 		"END " +
 		"FROM table"
 
-	assert.Equal(t, expectedSql, sql)
+	require.Equal(t, expectedSql, sql)
 
-	expectedArgs := []interface{}{true, "it's true!"}
-	assert.Equal(t, expectedArgs, args)
+	expectedArgs := []any{true, "it's true!"}
+	require.Equal(t, expectedArgs, args)
 }
 
 func TestMultipleCase(t *testing.T) {
@@ -111,20 +111,20 @@ func TestMultipleCase(t *testing.T) {
 
 	sql, args, err := qb.ToSql()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expectedSql := "SELECT " +
 		"(CASE x = ? WHEN true THEN ? ELSE 42 END) AS case_noval, " +
 		"(CASE WHEN x = ? THEN 'x is zero' WHEN x > ? THEN CONCAT('x is greater than ', ?) END) AS case_expr " +
 		"FROM table"
 
-	assert.Equal(t, expectedSql, sql)
+	require.Equal(t, expectedSql, sql)
 
-	expectedArgs := []interface{}{
+	expectedArgs := []any{
 		true, "it's true!",
 		0, 1, 2,
 	}
-	assert.Equal(t, expectedArgs, args)
+	require.Equal(t, expectedArgs, args)
 }
 
 func TestCaseWithNoWhenClause(t *testing.T) {
@@ -135,9 +135,9 @@ func TestCaseWithNoWhenClause(t *testing.T) {
 
 	_, _, err := qb.ToSql()
 
-	assert.Error(t, err)
+	require.Error(t, err)
 
-	assert.Equal(t, "case expression must contain at lease one WHEN clause", err.Error())
+	require.Equal(t, "case expression must contain at lease one WHEN clause", err.Error())
 }
 
 func TestCaseBuilderMustSql(t *testing.T) {

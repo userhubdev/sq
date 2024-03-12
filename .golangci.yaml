@@ -1,0 +1,26 @@
+run:
+  go: '1.22'
+
+linters-settings:
+  forbidigo:
+    forbid:
+      - ^print.*$
+      - 'fmt\.Print.*'
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/userhubdev/squirrel)
+      - blank
+      - dot
+    custom-order: true
+  gofmt:
+    rewrite-rules:
+      - pattern: 'interface{}'
+        replacement: 'any'
+
+linters:
+  enable:
+    - forbidigo
+    - gci
+    - gofmt

@@ -3,7 +3,7 @@ package squirrel
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUpdateBuilderToSql(t *testing.T) {
@@ -22,7 +22,7 @@ func TestUpdateBuilderToSql(t *testing.T) {
 		Suffix("RETURNING ?", 6)
 
 	sql, args, err := b.ToSql()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expectedSql :=
 		"WITH prefix AS ? " +
@@ -33,18 +33,18 @@ func TestUpdateBuilderToSql(t *testing.T) {
 			"WHERE d = ? " +
 			"ORDER BY e LIMIT 4 OFFSET 5 " +
 			"RETURNING ?"
-	assert.Equal(t, expectedSql, sql)
+	require.Equal(t, expectedSql, sql)
 
-	expectedArgs := []interface{}{0, 1, 2, "foo", "bar", 3, 6}
-	assert.Equal(t, expectedArgs, args)
+	expectedArgs := []any{0, 1, 2, "foo", "bar", 3, 6}
+	require.Equal(t, expectedArgs, args)
 }
 
 func TestUpdateBuilderToSqlErr(t *testing.T) {
 	_, _, err := Update("").Set("x", 1).ToSql()
-	assert.Error(t, err)
+	require.Error(t, err)
 
 	_, _, err = Update("x").ToSql()
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func TestUpdateBuilderMustSql(t *testing.T) {
@@ -60,10 +60,10 @@ func TestUpdateBuilderPlaceholders(t *testing.T) {
 	b := Update("test").SetMap(Eq{"x": 1, "y": 2})
 
 	sql, _, _ := b.PlaceholderFormat(Question).ToSql()
-	assert.Equal(t, "UPDATE test SET x = ?, y = ?", sql)
+	require.Equal(t, "UPDATE test SET x = ?, y = ?", sql)
 
 	sql, _, _ = b.PlaceholderFormat(Dollar).ToSql()
-	assert.Equal(t, "UPDATE test SET x = $1, y = $2", sql)
+	require.Equal(t, "UPDATE test SET x = $1, y = $2", sql)
 }
 
 func TestUpdateBuilderRunners(t *testing.T) {
@@ -72,21 +72,22 @@ func TestUpdateBuilderRunners(t *testing.T) {
 
 	expectedSql := "UPDATE test SET x = ?"
 
-	b.Exec()
-	assert.Equal(t, expectedSql, db.LastExecSql)
+	_, err := b.Exec()
+	require.NoError(t, err)
+	require.Equal(t, expectedSql, db.LastExecSql)
 }
 
 func TestUpdateBuilderNoRunner(t *testing.T) {
 	b := Update("test").Set("x", 1)
 
 	_, err := b.Exec()
-	assert.Equal(t, RunnerNotSet, err)
+	require.Equal(t, RunnerNotSet, err)
 }
 
 func TestUpdateBuilderFrom(t *testing.T) {
 	sql, _, err := Update("employees").Set("sales_count", 100).From("accounts").Where("accounts.name = ?", "ACME").ToSql()
-	assert.NoError(t, err)
-	assert.Equal(t, "UPDATE employees SET sales_count = ? FROM accounts WHERE accounts.name = ?", sql)
+	require.NoError(t, err)
+	require.Equal(t, "UPDATE employees SET sales_count = ? FROM accounts WHERE accounts.name = ?", sql)
 }
 
 func TestUpdateBuilderFromSelect(t *testing.T) {
@@ -96,12 +97,12 @@ func TestUpdateBuilderFromSelect(t *testing.T) {
 			From("accounts").
 			Where("accounts.name = ?", "ACME"), "subquery").
 		Where("employees.account_id = subquery.id").ToSql()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expectedSql :=
 		"UPDATE employees " +
 			"SET sales_count = ? " +
 			"FROM (SELECT id FROM accounts WHERE accounts.name = ?) AS subquery " +
 			"WHERE employees.account_id = subquery.id"
-	assert.Equal(t, expectedSql, sql)
+	require.Equal(t, expectedSql, sql)
 }

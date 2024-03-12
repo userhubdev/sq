@@ -26,7 +26,7 @@ type updateData struct {
 
 type setClause struct {
 	column string
-	value  interface{}
+	value  any
 }
 
 func (d *updateData) Exec() (sql.Result, error) {
@@ -54,7 +54,7 @@ func (d *updateData) QueryRow() RowScanner {
 	return QueryRowWith(queryRower, d)
 }
 
-func (d *updateData) ToSql() (sqlStr string, args []interface{}, err error) {
+func (d *updateData) ToSql() (sqlStr string, args []any, err error) {
 	if len(d.Table) == 0 {
 		err = fmt.Errorf("update statements must specify a table")
 		return
@@ -184,21 +184,21 @@ func (b UpdateBuilder) QueryRow() RowScanner {
 	return data.QueryRow()
 }
 
-func (b UpdateBuilder) Scan(dest ...interface{}) error {
+func (b UpdateBuilder) Scan(dest ...any) error {
 	return b.QueryRow().Scan(dest...)
 }
 
 // SQL methods
 
 // ToSql builds the query into a SQL string and bound args.
-func (b UpdateBuilder) ToSql() (string, []interface{}, error) {
+func (b UpdateBuilder) ToSql() (string, []any, error) {
 	data := builder.GetStruct(b).(updateData)
 	return data.ToSql()
 }
 
 // MustSql builds the query into a SQL string and bound args.
 // It panics if there are any errors.
-func (b UpdateBuilder) MustSql() (string, []interface{}) {
+func (b UpdateBuilder) MustSql() (string, []any) {
 	sql, args, err := b.ToSql()
 	if err != nil {
 		panic(err)
@@ -207,7 +207,7 @@ func (b UpdateBuilder) MustSql() (string, []interface{}) {
 }
 
 // Prefix adds an expression to the beginning of the query
-func (b UpdateBuilder) Prefix(sql string, args ...interface{}) UpdateBuilder {
+func (b UpdateBuilder) Prefix(sql string, args ...any) UpdateBuilder {
 	return b.PrefixExpr(Expr(sql, args...))
 }
 
@@ -222,12 +222,12 @@ func (b UpdateBuilder) Table(table string) UpdateBuilder {
 }
 
 // Set adds SET clauses to the query.
-func (b UpdateBuilder) Set(column string, value interface{}) UpdateBuilder {
+func (b UpdateBuilder) Set(column string, value any) UpdateBuilder {
 	return builder.Append(b, "SetClauses", setClause{column: column, value: value}).(UpdateBuilder)
 }
 
 // SetMap is a convenience method which calls .Set for each key/value pair in clauses.
-func (b UpdateBuilder) SetMap(clauses map[string]interface{}) UpdateBuilder {
+func (b UpdateBuilder) SetMap(clauses map[string]any) UpdateBuilder {
 	keys := make([]string, len(clauses))
 	i := 0
 	for key := range clauses {
@@ -236,7 +236,7 @@ func (b UpdateBuilder) SetMap(clauses map[string]interface{}) UpdateBuilder {
 	}
 	sort.Strings(keys)
 	for _, key := range keys {
-		val, _ := clauses[key]
+		val := clauses[key]
 		b = b.Set(key, val)
 	}
 	return b
@@ -258,7 +258,7 @@ func (b UpdateBuilder) FromSelect(from SelectBuilder, alias string) UpdateBuilde
 // Where adds WHERE expressions to the query.
 //
 // See SelectBuilder.Where for more information.
-func (b UpdateBuilder) Where(pred interface{}, args ...interface{}) UpdateBuilder {
+func (b UpdateBuilder) Where(pred any, args ...any) UpdateBuilder {
 	return builder.Append(b, "WhereParts", newWherePart(pred, args...)).(UpdateBuilder)
 }
 
@@ -278,7 +278,7 @@ func (b UpdateBuilder) Offset(offset uint64) UpdateBuilder {
 }
 
 // Suffix adds an expression to the end of the query
-func (b UpdateBuilder) Suffix(sql string, args ...interface{}) UpdateBuilder {
+func (b UpdateBuilder) Suffix(sql string, args ...any) UpdateBuilder {
 	return b.SuffixExpr(Expr(sql, args...))
 }
 

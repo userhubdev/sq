@@ -17,34 +17,34 @@ import (
 // ToSql returns a SQL representation of the Sqlizer, along with a slice of args
 // as passed to e.g. database/sql.Exec. It can also return an error.
 type Sqlizer interface {
-	ToSql() (string, []interface{}, error)
+	ToSql() (string, []any, error)
 }
 
 // rawSqlizer is expected to do what Sqlizer does, but without finalizing placeholders.
 // This is useful for nested queries.
 type rawSqlizer interface {
-	toSqlRaw() (string, []interface{}, error)
+	toSqlRaw() (string, []any, error)
 }
 
 // Execer is the interface that wraps the Exec method.
 //
 // Exec executes the given query as implemented by database/sql.Exec.
 type Execer interface {
-	Exec(query string, args ...interface{}) (sql.Result, error)
+	Exec(query string, args ...any) (sql.Result, error)
 }
 
 // Queryer is the interface that wraps the Query method.
 //
 // Query executes the given query as implemented by database/sql.Query.
 type Queryer interface {
-	Query(query string, args ...interface{}) (*sql.Rows, error)
+	Query(query string, args ...any) (*sql.Rows, error)
 }
 
 // QueryRower is the interface that wraps the QueryRow method.
 //
 // QueryRow executes the given query as implemented by database/sql.QueryRow.
 type QueryRower interface {
-	QueryRow(query string, args ...interface{}) RowScanner
+	QueryRow(query string, args ...any) RowScanner
 }
 
 // BaseRunner groups the Execer and Queryer interfaces.
@@ -69,20 +69,20 @@ func WrapStdSql(stdSql StdSql) Runner {
 // StdSql encompasses the standard methods of the *sql.DB type, and other types that
 // wrap these methods.
 type StdSql interface {
-	Query(string, ...interface{}) (*sql.Rows, error)
-	QueryRow(string, ...interface{}) *sql.Row
-	Exec(string, ...interface{}) (sql.Result, error)
+	Query(string, ...any) (*sql.Rows, error)
+	QueryRow(string, ...any) *sql.Row
+	Exec(string, ...any) (sql.Result, error)
 }
 
 type stdsqlRunner struct {
 	StdSql
 }
 
-func (r *stdsqlRunner) QueryRow(query string, args ...interface{}) RowScanner {
+func (r *stdsqlRunner) QueryRow(query string, args ...any) RowScanner {
 	return r.StdSql.QueryRow(query, args...)
 }
 
-func setRunWith(b interface{}, runner BaseRunner) interface{} {
+func setRunWith(b any, runner BaseRunner) any {
 	switch r := runner.(type) {
 	case StdSqlCtx:
 		runner = WrapStdSqlCtx(r)

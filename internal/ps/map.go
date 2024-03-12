@@ -15,7 +15,7 @@ import (
 )
 
 // Any is a shorthand for Go's verbose interface{} type.
-type Any interface{}
+type Any any
 
 // A Map associates unique keys (type string) with values (type Any).
 type Map interface {
@@ -88,8 +88,7 @@ func (self *tree) IsNil() bool {
 
 // clone returns an exact duplicate of a tree node
 func (self *tree) clone() *tree {
-	var m tree
-	m = *self
+	m := *self
 	return &m
 }
 
@@ -179,16 +178,6 @@ func deleteLowLevel(self *tree, partialHash, hash uint64) (*tree, bool) {
 	if self.isLeaf() { // we have no children
 		return nilMap, true
 	}
-	/*
-	   if self.subtreeCount() == 1 { // only one subtree
-	       for _, t := range self.children {
-	           if t != nilMap {
-	               return t, true
-	           }
-	       }
-	       panic("Tree with 1 subtree actually had no subtrees")
-	   }
-	*/
 
 	// find a node to replace us
 	i := -1
@@ -236,17 +225,6 @@ func (m *tree) deleteLeftmost() (*tree, *tree) {
 // isLeaf returns true if this is a leaf node
 func (m *tree) isLeaf() bool {
 	return m.Size() == 1
-}
-
-// returns the number of child subtrees we have
-func (m *tree) subtreeCount() int {
-	count := 0
-	for _, t := range m.children {
-		if t != nilMap {
-			count++
-		}
-	}
-	return count
 }
 
 func (m *tree) Lookup(key string) (Any, bool) {

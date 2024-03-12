@@ -52,7 +52,7 @@ func (sc *StmtCache) Prepare(query string) (*sql.Stmt, error) {
 }
 
 // Exec delegates down to the underlying Preparer using a prepared statement
-func (sc *StmtCache) Exec(query string, args ...interface{}) (res sql.Result, err error) {
+func (sc *StmtCache) Exec(query string, args ...any) (res sql.Result, err error) {
 	stmt, err := sc.Prepare(query)
 	if err != nil {
 		return
@@ -61,7 +61,7 @@ func (sc *StmtCache) Exec(query string, args ...interface{}) (res sql.Result, er
 }
 
 // Query delegates down to the underlying Preparer using a prepared statement
-func (sc *StmtCache) Query(query string, args ...interface{}) (rows *sql.Rows, err error) {
+func (sc *StmtCache) Query(query string, args ...any) (rows *sql.Rows, err error) {
 	stmt, err := sc.Prepare(query)
 	if err != nil {
 		return
@@ -70,7 +70,7 @@ func (sc *StmtCache) Query(query string, args ...interface{}) (rows *sql.Rows, e
 }
 
 // QueryRow delegates down to the underlying Preparer using a prepared statement
-func (sc *StmtCache) QueryRow(query string, args ...interface{}) RowScanner {
+func (sc *StmtCache) QueryRow(query string, args ...any) RowScanner {
 	stmt, err := sc.Prepare(query)
 	if err != nil {
 		return &Row{err: err}

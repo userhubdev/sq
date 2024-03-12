@@ -2,8 +2,9 @@ package ps
 
 import (
 	"sort"
-	. "strconv"
 	"testing"
+
+	. "strconv"
 )
 
 func TestMapNil(t *testing.T) {
