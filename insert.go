@@ -20,7 +20,7 @@ type insertData struct {
 	Options           []string
 	Into              string
 	Columns           []string
-	Values            [][]interface{}
+	Values            [][]any
 	Suffixes          []Sqlizer
 	Select            *SelectBuilder
 }
@@ -50,7 +50,7 @@ func (d *insertData) QueryRow() RowScanner {
 	return QueryRowWith(queryRower, d)
 }
 
-func (d *insertData) ToSql() (sqlStr string, args []interface{}, err error) {
+func (d *insertData) ToSql() (sqlStr string, args []any, err error) {
 	if len(d.Into) == 0 {
 		err = errors.New("insert statements must specify a table")
 		return
@@ -114,12 +114,15 @@ func (d *insertData) ToSql() (sqlStr string, args []interface{}, err error) {
 	return
 }
 
-func (d *insertData) appendValuesToSQL(w io.Writer, args []interface{}) ([]interface{}, error) {
+func (d *insertData) appendValuesToSQL(w io.Writer, args []any) ([]any, error) {
 	if len(d.Values) == 0 {
 		return args, errors.New("values for insert statements are not set")
 	}
 
-	io.WriteString(w, "VALUES ")
+	_, err := io.WriteString(w, "VALUES ")
+	if err != nil {
+		return nil, err
+	}
 
 	valuesStrings := make([]string, len(d.Values))
 	for r, row := range d.Values {
@@ -140,12 +143,15 @@ func (d *insertData) appendValuesToSQL(w io.Writer, args []interface{}) ([]inter
 		valuesStrings[r] = fmt.Sprintf("(%s)", strings.Join(valueStrings, ","))
 	}
 
-	io.WriteString(w, strings.Join(valuesStrings, ","))
+	_, err = io.WriteString(w, strings.Join(valuesStrings, ","))
+	if err != nil {
+		return nil, err
+	}
 
 	return args, nil
 }
 
-func (d *insertData) appendSelectToSQL(w io.Writer, args []interface{}) ([]interface{}, error) {
+func (d *insertData) appendSelectToSQL(w io.Writer, args []any) ([]any, error) {
 	if d.Select == nil {
 		return args, errors.New("select clause for insert statements are not set")
 	}
@@ -155,7 +161,10 @@ func (d *insertData) appendSelectToSQL(w io.Writer, args []interface{}) ([]inter
 		return args, err
 	}
 
-	io.WriteString(w, selectClause)
+	_, err = io.WriteString(w, selectClause)
+	if err != nil {
+		return nil, err
+	}
 	args = append(args, sArgs...)
 
 	return args, nil
@@ -204,21 +213,21 @@ func (b InsertBuilder) QueryRow() RowScanner {
 }
 
 // Scan is a shortcut for QueryRow().Scan.
-func (b InsertBuilder) Scan(dest ...interface{}) error {
+func (b InsertBuilder) Scan(dest ...any) error {
 	return b.QueryRow().Scan(dest...)
 }
 
 // SQL methods
 
 // ToSql builds the query into a SQL string and bound args.
-func (b InsertBuilder) ToSql() (string, []interface{}, error) {
+func (b InsertBuilder) ToSql() (string, []any, error) {
 	data := builder.GetStruct(b).(insertData)
 	return data.ToSql()
 }
 
 // MustSql builds the query into a SQL string and bound args.
 // It panics if there are any errors.
-func (b InsertBuilder) MustSql() (string, []interface{}) {
+func (b InsertBuilder) MustSql() (string, []any) {
 	sql, args, err := b.ToSql()
 	if err != nil {
 		panic(err)
@@ -227,7 +236,7 @@ func (b InsertBuilder) MustSql() (string, []interface{}) {
 }
 
 // Prefix adds an expression to the beginning of the query
-func (b InsertBuilder) Prefix(sql string, args ...interface{}) InsertBuilder {
+func (b InsertBuilder) Prefix(sql string, args ...any) InsertBuilder {
 	return b.PrefixExpr(Expr(sql, args...))
 }
 
@@ -252,12 +261,12 @@ func (b InsertBuilder) Columns(columns ...string) InsertBuilder {
 }
 
 // Values adds a single row's values to the query.
-func (b InsertBuilder) Values(values ...interface{}) InsertBuilder {
+func (b InsertBuilder) Values(values ...any) InsertBuilder {
 	return builder.Append(b, "Values", values).(InsertBuilder)
 }
 
 // Suffix adds an expression to the end of the query
-func (b InsertBuilder) Suffix(sql string, args ...interface{}) InsertBuilder {
+func (b InsertBuilder) Suffix(sql string, args ...any) InsertBuilder {
 	return b.SuffixExpr(Expr(sql, args...))
 }
 
@@ -268,7 +277,7 @@ func (b InsertBuilder) SuffixExpr(expr Sqlizer) InsertBuilder {
 
 // SetMap set columns and values for insert builder from a map of column name and value
 // note that it will reset all previous columns and values was set if any
-func (b InsertBuilder) SetMap(clauses map[string]interface{}) InsertBuilder {
+func (b InsertBuilder) SetMap(clauses map[string]any) InsertBuilder {
 	// Keep the columns in a consistent order by sorting the column key string.
 	cols := make([]string, 0, len(clauses))
 	for col := range clauses {
@@ -276,13 +285,13 @@ func (b InsertBuilder) SetMap(clauses map[string]interface{}) InsertBuilder {
 	}
 	sort.Strings(cols)
 
-	vals := make([]interface{}, 0, len(clauses))
+	vals := make([]any, 0, len(clauses))
 	for _, col := range cols {
 		vals = append(vals, clauses[col])
 	}
 
 	b = builder.Set(b, "Columns", cols).(InsertBuilder)
-	b = builder.Set(b, "Values", [][]interface{}{vals}).(InsertBuilder)
+	b = builder.Set(b, "Values", [][]any{vals}).(InsertBuilder)
 
 	return b
 }

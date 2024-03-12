@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	sqrl "github.com/userhubdev/squirrel"
 
@@ -79,25 +79,25 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func assertVals(t *testing.T, s sqrl.SelectBuilder, expected ...string) {
+func requireVals(t *testing.T, s sqrl.SelectBuilder, expected ...string) {
 	rows, err := s.Query()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer rows.Close()
 
 	vals := make([]string, len(expected))
 	for i := range vals {
-		assert.True(t, rows.Next())
-		assert.NoError(t, rows.Scan(&vals[i]))
+		require.True(t, rows.Next())
+		require.NoError(t, rows.Scan(&vals[i]))
 	}
-	assert.False(t, rows.Next())
+	require.False(t, rows.Next())
 
 	if expected != nil {
-		assert.Equal(t, expected, vals)
+		require.Equal(t, expected, vals)
 	}
 }
 
 func TestSimpleSelect(t *testing.T) {
-	assertVals(
+	requireVals(
 		t,
 		sb.Select("v").From("squirrel_integration"),
 		"foo", "bar", "foo", "baz")
@@ -105,31 +105,31 @@ func TestSimpleSelect(t *testing.T) {
 
 func TestEq(t *testing.T) {
 	s := sb.Select("v").From("squirrel_integration")
-	assertVals(t, s.Where(sqrl.Eq{"k": 4}), "baz")
-	assertVals(t, s.Where(sqrl.NotEq{"k": 2}), "foo", "bar", "baz")
-	assertVals(t, s.Where(sqrl.Eq{"k": []int{1, 4}}), "foo", "baz")
-	assertVals(t, s.Where(sqrl.NotEq{"k": []int{1, 4}}), "bar", "foo")
-	assertVals(t, s.Where(sqrl.Eq{"k": nil}))
-	assertVals(t, s.Where(sqrl.NotEq{"k": nil}), "foo", "bar", "foo", "baz")
-	assertVals(t, s.Where(sqrl.Eq{"k": []int{}}))
-	assertVals(t, s.Where(sqrl.NotEq{"k": []int{}}), "foo", "bar", "foo", "baz")
+	requireVals(t, s.Where(sqrl.Eq{"k": 4}), "baz")
+	requireVals(t, s.Where(sqrl.NotEq{"k": 2}), "foo", "bar", "baz")
+	requireVals(t, s.Where(sqrl.Eq{"k": []int{1, 4}}), "foo", "baz")
+	requireVals(t, s.Where(sqrl.NotEq{"k": []int{1, 4}}), "bar", "foo")
+	requireVals(t, s.Where(sqrl.Eq{"k": nil}))
+	requireVals(t, s.Where(sqrl.NotEq{"k": nil}), "foo", "bar", "foo", "baz")
+	requireVals(t, s.Where(sqrl.Eq{"k": []int{}}))
+	requireVals(t, s.Where(sqrl.NotEq{"k": []int{}}), "foo", "bar", "foo", "baz")
 }
 
 func TestIneq(t *testing.T) {
 	s := sb.Select("v").From("squirrel_integration")
-	assertVals(t, s.Where(sqrl.Lt{"k": 3}), "foo", "foo")
-	assertVals(t, s.Where(sqrl.Gt{"k": 3}), "baz")
+	requireVals(t, s.Where(sqrl.Lt{"k": 3}), "foo", "foo")
+	requireVals(t, s.Where(sqrl.Gt{"k": 3}), "baz")
 }
 
 func TestConj(t *testing.T) {
 	s := sb.Select("v").From("squirrel_integration")
-	assertVals(t, s.Where(sqrl.And{sqrl.Gt{"k": 1}, sqrl.Lt{"k": 4}}), "bar", "foo")
-	assertVals(t, s.Where(sqrl.Or{sqrl.Gt{"k": 3}, sqrl.Lt{"k": 2}}), "foo", "baz")
+	requireVals(t, s.Where(sqrl.And{sqrl.Gt{"k": 1}, sqrl.Lt{"k": 4}}), "bar", "foo")
+	requireVals(t, s.Where(sqrl.Or{sqrl.Gt{"k": 3}, sqrl.Lt{"k": 2}}), "foo", "baz")
 }
 
 func TestContext(t *testing.T) {
 	s := sb.Select("v").From("squirrel_integration")
 	ctx := context.Background()
 	_, err := s.QueryContext(ctx)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

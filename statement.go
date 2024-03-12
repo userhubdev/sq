@@ -44,7 +44,7 @@ func (b StatementBuilderType) RunWith(runner BaseRunner) StatementBuilderType {
 // Where adds WHERE expressions to the query.
 //
 // See SelectBuilder.Where for more information.
-func (b StatementBuilderType) Where(pred interface{}, args ...interface{}) StatementBuilderType {
+func (b StatementBuilderType) Where(pred any, args ...any) StatementBuilderType {
 	return builder.Append(b, "WhereParts", newWherePart(pred, args...)).(StatementBuilderType)
 }
 
@@ -89,7 +89,7 @@ func Delete(from string) DeleteBuilder {
 
 // Case returns a new CaseBuilder
 // "what" represents case value
-func Case(what ...interface{}) CaseBuilder {
+func Case(what ...any) CaseBuilder {
 	b := CaseBuilder(builder.EmptyBuilder)
 
 	switch len(what) {

@@ -10,7 +10,7 @@ import (
 type Foo struct {
 	X   int
 	Y   int
-	I   interface{}
+	I   any
 	Add []int
 }
 
@@ -24,7 +24,7 @@ func (b fooBuilder) Y(i int) fooBuilder {
 	return builder.Set(b, "Y", i).(fooBuilder)
 }
 
-func (b fooBuilder) I(i interface{}) fooBuilder {
+func (b fooBuilder) I(i any) fooBuilder {
 	return builder.Set(b, "I", i).(fooBuilder)
 }
 
@@ -40,7 +40,7 @@ func (b unregBuilder) Add(i int) unregBuilder {
 	return builder.Append(b, "X", i).(unregBuilder)
 }
 
-func assertInt(t *testing.T, b fooBuilder, key string, val int) {
+func requireInt(t *testing.T, b fooBuilder, key string, val int) {
 	v, ok := builder.Get(b, key)
 	if !ok {
 		t.Errorf("key %v not set", key)
@@ -50,13 +50,12 @@ func assertInt(t *testing.T, b fooBuilder, key string, val int) {
 	if i != val {
 		t.Errorf("expected %d, got %d", val, i)
 	}
-	return
 }
 
 func TestBuilder(t *testing.T) {
 	b := FooBuilder.X(1).Y(2)
-	assertInt(t, b, "X", 1)
-	assertInt(t, b, "Y", 2)
+	requireInt(t, b, "X", 1)
+	requireInt(t, b, "Y", 2)
 	v, _ := builder.Get(b, "Z")
 	if v != nil {
 		t.Errorf("expected nil, got %v", v)
@@ -111,15 +110,15 @@ func TestSplitChain(t *testing.T) {
 	b1 := FooBuilder.X(1)
 	b2 := b1.X(2)
 	b3 := b1.X(3)
-	assertInt(t, b1, "X", 1)
-	assertInt(t, b2, "X", 2)
-	assertInt(t, b3, "X", 3)
+	requireInt(t, b1, "X", 1)
+	requireInt(t, b2, "X", 2)
+	requireInt(t, b3, "X", 3)
 }
 
 func TestGetMap(t *testing.T) {
 	b := FooBuilder.X(1).Y(2).Add(3).Add(4)
 	m := builder.GetMap(b)
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"X":   1,
 		"Y":   2,
 		"Add": []int{3, 4},
@@ -158,14 +157,14 @@ func TestUnregisteredBuilder(t *testing.T) {
 	b := unregBuilder{}.Add(1)
 
 	x, _ := builder.Get(b, "X")
-	expected := []interface{}{1}
-	if !reflect.DeepEqual(x.([]interface{}), expected) {
+	expected := []any{1}
+	if !reflect.DeepEqual(x.([]any), expected) {
 		t.Errorf("expected %v, got %v", expected, x)
 	}
 
 	x = builder.GetMap(b)["X"]
-	expected = []interface{}{1}
-	if !reflect.DeepEqual(x.([]interface{}), expected) {
+	expected = []any{1}
+	if !reflect.DeepEqual(x.([]any), expected) {
 		t.Errorf("expected %v, got %v", expected, x)
 	}
 
@@ -181,7 +180,7 @@ func TestSetNil(t *testing.T) {
 }
 
 func TestSetInvalidNil(t *testing.T) {
-	var panicVal interface{}
+	var panicVal any
 	func() {
 		defer func() { panicVal = recover() }()
 		b := builder.Set(FooBuilder, "X", nil)

@@ -3,7 +3,7 @@ package squirrel
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStmtCacherPrepareContext(t *testing.T) {
@@ -11,9 +11,11 @@ func TestStmtCacherPrepareContext(t *testing.T) {
 	sc := NewStmtCache(db)
 	query := "SELECT 1"
 
-	sc.PrepareContext(ctx, query)
-	assert.Equal(t, query, db.LastPrepareSql)
+	_, err := sc.PrepareContext(ctx, query)
+	require.NoError(t, err)
+	require.Equal(t, query, db.LastPrepareSql)
 
-	sc.PrepareContext(ctx, query)
-	assert.Equal(t, 1, db.PrepareCount, "expected 1 Prepare, got %d", db.PrepareCount)
+	_, err = sc.PrepareContext(ctx, query)
+	require.NoError(t, err)
+	require.Equal(t, 1, db.PrepareCount, "expected 1 Prepare, got %d", db.PrepareCount)
 }

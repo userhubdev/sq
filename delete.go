@@ -28,7 +28,7 @@ func (d *deleteData) Exec() (sql.Result, error) {
 	return ExecWith(d.RunWith, d)
 }
 
-func (d *deleteData) ToSql() (sqlStr string, args []interface{}, err error) {
+func (d *deleteData) ToSql() (sqlStr string, args []any, err error) {
 	if len(d.From) == 0 {
 		err = fmt.Errorf("delete statements must specify a From table")
 		return
@@ -116,14 +116,14 @@ func (b DeleteBuilder) Exec() (sql.Result, error) {
 // SQL methods
 
 // ToSql builds the query into a SQL string and bound args.
-func (b DeleteBuilder) ToSql() (string, []interface{}, error) {
+func (b DeleteBuilder) ToSql() (string, []any, error) {
 	data := builder.GetStruct(b).(deleteData)
 	return data.ToSql()
 }
 
 // MustSql builds the query into a SQL string and bound args.
 // It panics if there are any errors.
-func (b DeleteBuilder) MustSql() (string, []interface{}) {
+func (b DeleteBuilder) MustSql() (string, []any) {
 	sql, args, err := b.ToSql()
 	if err != nil {
 		panic(err)
@@ -132,7 +132,7 @@ func (b DeleteBuilder) MustSql() (string, []interface{}) {
 }
 
 // Prefix adds an expression to the beginning of the query
-func (b DeleteBuilder) Prefix(sql string, args ...interface{}) DeleteBuilder {
+func (b DeleteBuilder) Prefix(sql string, args ...any) DeleteBuilder {
 	return b.PrefixExpr(Expr(sql, args...))
 }
 
@@ -149,7 +149,7 @@ func (b DeleteBuilder) From(from string) DeleteBuilder {
 // Where adds WHERE expressions to the query.
 //
 // See SelectBuilder.Where for more information.
-func (b DeleteBuilder) Where(pred interface{}, args ...interface{}) DeleteBuilder {
+func (b DeleteBuilder) Where(pred any, args ...any) DeleteBuilder {
 	return builder.Append(b, "WhereParts", newWherePart(pred, args...)).(DeleteBuilder)
 }
 
@@ -169,7 +169,7 @@ func (b DeleteBuilder) Offset(offset uint64) DeleteBuilder {
 }
 
 // Suffix adds an expression to the end of the query
-func (b DeleteBuilder) Suffix(sql string, args ...interface{}) DeleteBuilder {
+func (b DeleteBuilder) Suffix(sql string, args ...any) DeleteBuilder {
 	return b.SuffixExpr(Expr(sql, args...))
 }
 

@@ -2,14 +2,14 @@ package builder
 
 import "reflect"
 
-func convert(from interface{}, to interface{}) interface{} {
+func convert(from any, to any) any {
 	return reflect.
 		ValueOf(from).
 		Convert(reflect.TypeOf(to)).
 		Interface()
 }
 
-func forEach(s interface{}, f func(interface{})) {
+func forEach(s any, f func(any)) {
 	val := reflect.ValueOf(s)
 
 	kind := val.Kind()

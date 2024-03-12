@@ -62,6 +62,6 @@ func (b InsertBuilder) QueryRowContext(ctx context.Context) RowScanner {
 }
 
 // ScanContext is a shortcut for QueryRowContext().Scan.
-func (b InsertBuilder) ScanContext(ctx context.Context, dest ...interface{}) error {
+func (b InsertBuilder) ScanContext(ctx context.Context, dest ...any) error {
 	return b.QueryRowContext(ctx).Scan(dest...)
 }
