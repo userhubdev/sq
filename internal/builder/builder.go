@@ -5,7 +5,7 @@ import (
 	"go/ast"
 	"reflect"
 
-	"github.com/userhubdev/squirrel/internal/ps"
+	"github.com/userhubdev/sq/internal/ps"
 )
 
 // Builder stores a set of named values.

@@ -1,17 +1,15 @@
-package squirrel
+package sq
 
 import (
 	"bytes"
-	"database/sql"
 	"fmt"
 	"strings"
 
-	"github.com/userhubdev/squirrel/internal/builder"
+	"github.com/userhubdev/sq/internal/builder"
 )
 
 type deleteData struct {
 	PlaceholderFormat PlaceholderFormat
-	RunWith           BaseRunner
 	Prefixes          []Sqlizer
 	From              string
 	WhereParts        []Sqlizer
@@ -19,13 +17,6 @@ type deleteData struct {
 	Limit             string
 	Offset            string
 	Suffixes          []Sqlizer
-}
-
-func (d *deleteData) Exec() (sql.Result, error) {
-	if d.RunWith == nil {
-		return nil, RunnerNotSet
-	}
-	return ExecWith(d.RunWith, d)
 }
 
 func (d *deleteData) ToSql() (sqlStr string, args []any, err error) {
@@ -100,35 +91,12 @@ func (b DeleteBuilder) PlaceholderFormat(f PlaceholderFormat) DeleteBuilder {
 	return builder.Set(b, "PlaceholderFormat", f).(DeleteBuilder)
 }
 
-// Runner methods
-
-// RunWith sets a Runner (like database/sql.DB) to be used with e.g. Exec.
-func (b DeleteBuilder) RunWith(runner BaseRunner) DeleteBuilder {
-	return setRunWith(b, runner).(DeleteBuilder)
-}
-
-// Exec builds and Execs the query with the Runner set by RunWith.
-func (b DeleteBuilder) Exec() (sql.Result, error) {
-	data := builder.GetStruct(b).(deleteData)
-	return data.Exec()
-}
-
 // SQL methods
 
 // ToSql builds the query into a SQL string and bound args.
 func (b DeleteBuilder) ToSql() (string, []any, error) {
 	data := builder.GetStruct(b).(deleteData)
 	return data.ToSql()
-}
-
-// MustSql builds the query into a SQL string and bound args.
-// It panics if there are any errors.
-func (b DeleteBuilder) MustSql() (string, []any) {
-	sql, args, err := b.ToSql()
-	if err != nil {
-		panic(err)
-	}
-	return sql, args
 }
 
 // Prefix adds an expression to the beginning of the query
@@ -176,16 +144,4 @@ func (b DeleteBuilder) Suffix(sql string, args ...any) DeleteBuilder {
 // SuffixExpr adds an expression to the end of the query
 func (b DeleteBuilder) SuffixExpr(expr Sqlizer) DeleteBuilder {
 	return builder.Append(b, "Suffixes", expr).(DeleteBuilder)
-}
-
-func (b DeleteBuilder) Query() (*sql.Rows, error) {
-	data := builder.GetStruct(b).(deleteData)
-	return data.Query()
-}
-
-func (d *deleteData) Query() (*sql.Rows, error) {
-	if d.RunWith == nil {
-		return nil, RunnerNotSet
-	}
-	return QueryWith(d.RunWith, d)
 }

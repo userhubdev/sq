@@ -1,4 +1,4 @@
-package squirrel
+package sq
 
 import (
 	"testing"
@@ -138,13 +138,4 @@ func TestCaseWithNoWhenClause(t *testing.T) {
 	require.Error(t, err)
 
 	require.Equal(t, "case expression must contain at lease one WHEN clause", err.Error())
-}
-
-func TestCaseBuilderMustSql(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("TestCaseBuilderMustSql should have panicked!")
-		}
-	}()
-	Case("").MustSql()
 }

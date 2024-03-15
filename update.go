@@ -1,18 +1,16 @@
-package squirrel
+package sq
 
 import (
 	"bytes"
-	"database/sql"
 	"fmt"
 	"sort"
 	"strings"
 
-	"github.com/userhubdev/squirrel/internal/builder"
+	"github.com/userhubdev/sq/internal/builder"
 )
 
 type updateData struct {
 	PlaceholderFormat PlaceholderFormat
-	RunWith           BaseRunner
 	Prefixes          []Sqlizer
 	Table             string
 	SetClauses        []setClause
@@ -27,31 +25,6 @@ type updateData struct {
 type setClause struct {
 	column string
 	value  any
-}
-
-func (d *updateData) Exec() (sql.Result, error) {
-	if d.RunWith == nil {
-		return nil, RunnerNotSet
-	}
-	return ExecWith(d.RunWith, d)
-}
-
-func (d *updateData) Query() (*sql.Rows, error) {
-	if d.RunWith == nil {
-		return nil, RunnerNotSet
-	}
-	return QueryWith(d.RunWith, d)
-}
-
-func (d *updateData) QueryRow() RowScanner {
-	if d.RunWith == nil {
-		return &Row{err: RunnerNotSet}
-	}
-	queryRower, ok := d.RunWith.(QueryRower)
-	if !ok {
-		return &Row{err: RunnerNotQueryRunner}
-	}
-	return QueryRowWith(queryRower, d)
 }
 
 func (d *updateData) ToSql() (sqlStr string, args []any, err error) {
@@ -161,49 +134,12 @@ func (b UpdateBuilder) PlaceholderFormat(f PlaceholderFormat) UpdateBuilder {
 	return builder.Set(b, "PlaceholderFormat", f).(UpdateBuilder)
 }
 
-// Runner methods
-
-// RunWith sets a Runner (like database/sql.DB) to be used with e.g. Exec.
-func (b UpdateBuilder) RunWith(runner BaseRunner) UpdateBuilder {
-	return setRunWith(b, runner).(UpdateBuilder)
-}
-
-// Exec builds and Execs the query with the Runner set by RunWith.
-func (b UpdateBuilder) Exec() (sql.Result, error) {
-	data := builder.GetStruct(b).(updateData)
-	return data.Exec()
-}
-
-func (b UpdateBuilder) Query() (*sql.Rows, error) {
-	data := builder.GetStruct(b).(updateData)
-	return data.Query()
-}
-
-func (b UpdateBuilder) QueryRow() RowScanner {
-	data := builder.GetStruct(b).(updateData)
-	return data.QueryRow()
-}
-
-func (b UpdateBuilder) Scan(dest ...any) error {
-	return b.QueryRow().Scan(dest...)
-}
-
 // SQL methods
 
 // ToSql builds the query into a SQL string and bound args.
 func (b UpdateBuilder) ToSql() (string, []any, error) {
 	data := builder.GetStruct(b).(updateData)
 	return data.ToSql()
-}
-
-// MustSql builds the query into a SQL string and bound args.
-// It panics if there are any errors.
-func (b UpdateBuilder) MustSql() (string, []any) {
-	sql, args, err := b.ToSql()
-	if err != nil {
-		panic(err)
-	}
-	return sql, args
 }
 
 // Prefix adds an expression to the beginning of the query

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/userhubdev/squirrel/internal/builder"
+	"github.com/userhubdev/sq/internal/builder"
 )
 
 type Foo struct {

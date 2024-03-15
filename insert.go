@@ -1,20 +1,18 @@
-package squirrel
+package sq
 
 import (
 	"bytes"
-	"database/sql"
 	"errors"
 	"fmt"
 	"io"
 	"sort"
 	"strings"
 
-	"github.com/userhubdev/squirrel/internal/builder"
+	"github.com/userhubdev/sq/internal/builder"
 )
 
 type insertData struct {
 	PlaceholderFormat PlaceholderFormat
-	RunWith           BaseRunner
 	Prefixes          []Sqlizer
 	StatementKeyword  string
 	Options           []string
@@ -23,31 +21,6 @@ type insertData struct {
 	Values            [][]any
 	Suffixes          []Sqlizer
 	Select            *SelectBuilder
-}
-
-func (d *insertData) Exec() (sql.Result, error) {
-	if d.RunWith == nil {
-		return nil, RunnerNotSet
-	}
-	return ExecWith(d.RunWith, d)
-}
-
-func (d *insertData) Query() (*sql.Rows, error) {
-	if d.RunWith == nil {
-		return nil, RunnerNotSet
-	}
-	return QueryWith(d.RunWith, d)
-}
-
-func (d *insertData) QueryRow() RowScanner {
-	if d.RunWith == nil {
-		return &Row{err: RunnerNotSet}
-	}
-	queryRower, ok := d.RunWith.(QueryRower)
-	if !ok {
-		return &Row{err: RunnerNotQueryRunner}
-	}
-	return QueryRowWith(queryRower, d)
 }
 
 func (d *insertData) ToSql() (sqlStr string, args []any, err error) {
@@ -187,52 +160,12 @@ func (b InsertBuilder) PlaceholderFormat(f PlaceholderFormat) InsertBuilder {
 	return builder.Set(b, "PlaceholderFormat", f).(InsertBuilder)
 }
 
-// Runner methods
-
-// RunWith sets a Runner (like database/sql.DB) to be used with e.g. Exec.
-func (b InsertBuilder) RunWith(runner BaseRunner) InsertBuilder {
-	return setRunWith(b, runner).(InsertBuilder)
-}
-
-// Exec builds and Execs the query with the Runner set by RunWith.
-func (b InsertBuilder) Exec() (sql.Result, error) {
-	data := builder.GetStruct(b).(insertData)
-	return data.Exec()
-}
-
-// Query builds and Querys the query with the Runner set by RunWith.
-func (b InsertBuilder) Query() (*sql.Rows, error) {
-	data := builder.GetStruct(b).(insertData)
-	return data.Query()
-}
-
-// QueryRow builds and QueryRows the query with the Runner set by RunWith.
-func (b InsertBuilder) QueryRow() RowScanner {
-	data := builder.GetStruct(b).(insertData)
-	return data.QueryRow()
-}
-
-// Scan is a shortcut for QueryRow().Scan.
-func (b InsertBuilder) Scan(dest ...any) error {
-	return b.QueryRow().Scan(dest...)
-}
-
 // SQL methods
 
 // ToSql builds the query into a SQL string and bound args.
 func (b InsertBuilder) ToSql() (string, []any, error) {
 	data := builder.GetStruct(b).(insertData)
 	return data.ToSql()
-}
-
-// MustSql builds the query into a SQL string and bound args.
-// It panics if there are any errors.
-func (b InsertBuilder) MustSql() (string, []any) {
-	sql, args, err := b.ToSql()
-	if err != nil {
-		panic(err)
-	}
-	return sql, args
 }
 
 // Prefix adds an expression to the beginning of the query

@@ -1,4 +1,4 @@
-package squirrel
+package sq
 
 import (
 	"fmt"
@@ -14,8 +14,8 @@ func (p wherePart) ToSql() (sql string, args []any, err error) {
 	switch pred := p.pred.(type) {
 	case nil:
 		// no-op
-	case rawSqlizer:
-		return pred.toSqlRaw()
+	case RawSqlizer:
+		return pred.ToSqlRaw()
 	case Sqlizer:
 		return pred.ToSql()
 	case map[string]any:

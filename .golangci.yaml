@@ -10,7 +10,7 @@ linters-settings:
     sections:
       - standard
       - default
-      - prefix(github.com/userhubdev/squirrel)
+      - prefix(github.com/userhubdev/sq)
       - blank
       - dot
     custom-order: true

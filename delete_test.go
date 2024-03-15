@@ -1,4 +1,4 @@
-package squirrel
+package sq
 
 import (
 	"testing"
@@ -34,15 +34,6 @@ func TestDeleteBuilderToSqlErr(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestDeleteBuilderMustSql(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("TestDeleteBuilderMustSql should have panicked!")
-		}
-	}()
-	Delete("").MustSql()
-}
-
 func TestDeleteBuilderPlaceholders(t *testing.T) {
 	b := Delete("test").Where("x = ? AND y = ?", 1, 2)
 
@@ -51,33 +42,4 @@ func TestDeleteBuilderPlaceholders(t *testing.T) {
 
 	sql, _, _ = b.PlaceholderFormat(Dollar).ToSql()
 	require.Equal(t, "DELETE FROM test WHERE x = $1 AND y = $2", sql)
-}
-
-func TestDeleteBuilderRunners(t *testing.T) {
-	db := &DBStub{}
-	b := Delete("test").Where("x = ?", 1).RunWith(db)
-
-	expectedSql := "DELETE FROM test WHERE x = ?"
-
-	_, err := b.Exec()
-	require.NoError(t, err)
-	require.Equal(t, expectedSql, db.LastExecSql)
-}
-
-func TestDeleteBuilderNoRunner(t *testing.T) {
-	b := Delete("test")
-
-	_, err := b.Exec()
-	require.Equal(t, RunnerNotSet, err)
-}
-
-func TestDeleteWithQuery(t *testing.T) {
-	db := &DBStub{}
-	b := Delete("test").Where("id=55").Suffix("RETURNING path").RunWith(db)
-
-	expectedSql := "DELETE FROM test WHERE id=55 RETURNING path"
-	_, err := b.Query()
-	require.NoError(t, err)
-
-	require.Equal(t, expectedSql, db.LastQuerySql)
 }
