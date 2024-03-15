@@ -1,4 +1,4 @@
-package squirrel
+package sq
 
 import (
 	"testing"
@@ -37,15 +37,6 @@ func TestInsertBuilderToSqlErr(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestInsertBuilderMustSql(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("TestInsertBuilderMustSql should have panicked!")
-		}
-	}()
-	Insert("").MustSql()
-}
-
 func TestInsertBuilderPlaceholders(t *testing.T) {
 	b := Insert("test").Values(1, 2)
 
@@ -54,24 +45,6 @@ func TestInsertBuilderPlaceholders(t *testing.T) {
 
 	sql, _, _ = b.PlaceholderFormat(Dollar).ToSql()
 	require.Equal(t, "INSERT INTO test VALUES ($1,$2)", sql)
-}
-
-func TestInsertBuilderRunners(t *testing.T) {
-	db := &DBStub{}
-	b := Insert("test").Values(1).RunWith(db)
-
-	expectedSQL := "INSERT INTO test VALUES (?)"
-
-	_, err := b.Exec()
-	require.NoError(t, err)
-	require.Equal(t, expectedSQL, db.LastExecSql)
-}
-
-func TestInsertBuilderNoRunner(t *testing.T) {
-	b := Insert("test").Values(1)
-
-	_, err := b.Exec()
-	require.Equal(t, RunnerNotSet, err)
 }
 
 func TestInsertBuilderSetMap(t *testing.T) {

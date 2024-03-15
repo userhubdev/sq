@@ -1,4 +1,4 @@
-package squirrel
+package sq
 
 import (
 	"fmt"
@@ -30,8 +30,8 @@ func (p part) ToSql() (sql string, args []any, err error) {
 }
 
 func nestedToSql(s Sqlizer) (string, []any, error) {
-	if raw, ok := s.(rawSqlizer); ok {
-		return raw.toSqlRaw()
+	if raw, ok := s.(RawSqlizer); ok {
+		return raw.ToSqlRaw()
 	} else {
 		return s.ToSql()
 	}

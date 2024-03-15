@@ -1,10 +1,10 @@
-package squirrel
+package sq
 
 import (
 	"bytes"
 	"errors"
 
-	"github.com/userhubdev/squirrel/internal/builder"
+	"github.com/userhubdev/sq/internal/builder"
 )
 
 func init() {
@@ -98,16 +98,6 @@ type CaseBuilder builder.Builder
 func (b CaseBuilder) ToSql() (string, []any, error) {
 	data := builder.GetStruct(b).(caseData)
 	return data.ToSql()
-}
-
-// MustSql builds the query into a SQL string and bound args.
-// It panics if there are any errors.
-func (b CaseBuilder) MustSql() (string, []any) {
-	sql, args, err := b.ToSql()
-	if err != nil {
-		panic(err)
-	}
-	return sql, args
 }
 
 // what sets optional value for CASE construct "CASE [value] ..."

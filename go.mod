@@ -1,4 +1,4 @@
-module github.com/userhubdev/squirrel
+module github.com/userhubdev/sq
 
 go 1.22
 

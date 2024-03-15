@@ -1,4 +1,4 @@
-package squirrel
+package sq
 
 import (
 	"testing"
@@ -47,15 +47,6 @@ func TestUpdateBuilderToSqlErr(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestUpdateBuilderMustSql(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("TestUpdateBuilderMustSql should have panicked!")
-		}
-	}()
-	Update("").MustSql()
-}
-
 func TestUpdateBuilderPlaceholders(t *testing.T) {
 	b := Update("test").SetMap(Eq{"x": 1, "y": 2})
 
@@ -64,24 +55,6 @@ func TestUpdateBuilderPlaceholders(t *testing.T) {
 
 	sql, _, _ = b.PlaceholderFormat(Dollar).ToSql()
 	require.Equal(t, "UPDATE test SET x = $1, y = $2", sql)
-}
-
-func TestUpdateBuilderRunners(t *testing.T) {
-	db := &DBStub{}
-	b := Update("test").Set("x", 1).RunWith(db)
-
-	expectedSql := "UPDATE test SET x = ?"
-
-	_, err := b.Exec()
-	require.NoError(t, err)
-	require.Equal(t, expectedSql, db.LastExecSql)
-}
-
-func TestUpdateBuilderNoRunner(t *testing.T) {
-	b := Update("test").Set("x", 1)
-
-	_, err := b.Exec()
-	require.Equal(t, RunnerNotSet, err)
 }
 
 func TestUpdateBuilderFrom(t *testing.T) {

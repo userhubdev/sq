@@ -3,7 +3,7 @@ package builder_test
 import (
 	"fmt"
 
-	"github.com/userhubdev/squirrel/internal/builder"
+	"github.com/userhubdev/sq/internal/builder"
 )
 
 // Simple math expression allowing multiple adds/subtracts and a single
