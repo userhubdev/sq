@@ -1,7 +1,6 @@
 package sq
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 )
@@ -86,7 +85,7 @@ func Placeholders(count int) string {
 }
 
 func replacePositionalPlaceholders(sql, prefix string) (string, error) {
-	buf := &bytes.Buffer{}
+	b := &strings.Builder{}
 	i := 0
 	for {
 		p := strings.Index(sql, "?")
@@ -95,20 +94,20 @@ func replacePositionalPlaceholders(sql, prefix string) (string, error) {
 		}
 
 		if len(sql[p:]) > 1 && sql[p:p+2] == "??" { // escape ?? => ?
-			buf.WriteString(sql[:p])
-			buf.WriteString("?")
+			b.WriteString(sql[:p])
+			b.WriteString("?")
 			if len(sql[p:]) == 1 {
 				break
 			}
 			sql = sql[p+2:]
 		} else {
 			i++
-			buf.WriteString(sql[:p])
-			fmt.Fprintf(buf, "%s%d", prefix, i)
+			b.WriteString(sql[:p])
+			fmt.Fprintf(b, "%s%d", prefix, i)
 			sql = sql[p+1:]
 		}
 	}
 
-	buf.WriteString(sql)
-	return buf.String(), nil
+	b.WriteString(sql)
+	return b.String(), nil
 }

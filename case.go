@@ -1,7 +1,6 @@
 package sq
 
 import (
-	"bytes"
 	"errors"
 
 	"github.com/userhubdev/sq/internal/builder"
@@ -9,37 +8,6 @@ import (
 
 func init() {
 	builder.Register(CaseBuilder{}, caseData{})
-}
-
-// sqlizerBuffer is a helper that allows to write many Sqlizers one by one
-// without constant checks for errors that may come from Sqlizer
-type sqlizerBuffer struct {
-	bytes.Buffer
-	args []any
-	err  error
-}
-
-// WriteSql converts Sqlizer to SQL strings and writes it to buffer
-func (b *sqlizerBuffer) WriteSql(item Sqlizer) {
-	if b.err != nil {
-		return
-	}
-
-	var str string
-	var args []any
-	str, args, b.err = nestedToSql(item)
-
-	if b.err != nil {
-		return
-	}
-
-	b.WriteString(str)
-	b.WriteByte(' ')
-	b.args = append(b.args, args...)
-}
-
-func (b *sqlizerBuffer) ToSql() (string, []any, error) {
-	return b.String(), b.args, b.err
 }
 
 // whenPart is a helper structure to describe SQLs "WHEN ... THEN ..." expression
@@ -67,26 +35,26 @@ func (d *caseData) ToSql() (sqlStr string, args []any, err error) {
 		return
 	}
 
-	sql := sqlizerBuffer{}
+	sql := Builder{}
 
-	sql.WriteString("CASE ")
+	sql.WriteString("CASE")
 	if d.What != nil {
 		sql.WriteSql(d.What)
 	}
 
 	for _, p := range d.WhenParts {
-		sql.WriteString("WHEN ")
+		sql.WriteString(" WHEN")
 		sql.WriteSql(p.when)
-		sql.WriteString("THEN ")
+		sql.WriteString(" THEN")
 		sql.WriteSql(p.then)
 	}
 
 	if d.Else != nil {
-		sql.WriteString("ELSE ")
+		sql.WriteString(" ELSE")
 		sql.WriteSql(d.Else)
 	}
 
-	sql.WriteString("END")
+	sql.WriteString(" END")
 
 	return sql.ToSql()
 }

@@ -10,8 +10,8 @@
 package ps
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 )
 
 // Any is a shorthand for Go's verbose interface{} type.
@@ -279,11 +279,12 @@ func (m *tree) Keys() []string {
 // make it easier to display maps for debugging
 func (m *tree) String() string {
 	keys := m.Keys()
-	buf := bytes.NewBufferString("{")
+	var b strings.Builder
+	b.WriteString("{")
 	for _, key := range keys {
 		val, _ := m.Lookup(key)
-		fmt.Fprintf(buf, "%s: %s, ", key, val)
+		fmt.Fprintf(&b, "%s: %s, ", key, val)
 	}
-	fmt.Fprintf(buf, "}\n")
-	return buf.String()
+	fmt.Fprintf(&b, "}\n")
+	return b.String()
 }
