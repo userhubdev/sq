@@ -1,7 +1,6 @@
 package sq
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
@@ -25,7 +24,7 @@ func (d *deleteData) ToSql() (sqlStr string, args []any, err error) {
 		return
 	}
 
-	sql := &bytes.Buffer{}
+	sql := &strings.Builder{}
 
 	if len(d.Prefixes) > 0 {
 		args, err = appendToSql(d.Prefixes, sql, " ", args)

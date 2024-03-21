@@ -1,7 +1,7 @@
 package sq
 
 import (
-	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -13,15 +13,15 @@ func TestWherePartsAppendToSql(t *testing.T) {
 		newWherePart(nil),
 		newWherePart(Eq{"y": 2}),
 	}
-	sql := &bytes.Buffer{}
-	args, _ := appendToSql(parts, sql, " AND ", []any{})
+	var sql strings.Builder
+	args, _ := appendToSql(parts, &sql, " AND ", []any{})
 	require.Equal(t, "x = ? AND y = ?", sql.String())
 	require.Equal(t, []any{1, 2}, args)
 }
 
 func TestWherePartsAppendToSqlErr(t *testing.T) {
 	parts := []Sqlizer{newWherePart(1)}
-	_, err := appendToSql(parts, &bytes.Buffer{}, "", []any{})
+	_, err := appendToSql(parts, &strings.Builder{}, "", []any{})
 	require.Error(t, err)
 }
 

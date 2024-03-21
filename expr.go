@@ -1,7 +1,6 @@
 package sq
 
 import (
-	"bytes"
 	"database/sql/driver"
 	"fmt"
 	"reflect"
@@ -40,7 +39,7 @@ func (e expr) ToSql() (sql string, args []any, err error) {
 		return e.sql, e.args, nil
 	}
 
-	buf := &bytes.Buffer{}
+	b := &strings.Builder{}
 	ap := e.args
 	sp := e.sql
 
@@ -55,7 +54,7 @@ func (e expr) ToSql() (sql string, args []any, err error) {
 		}
 		if len(sp) > i+1 && sp[i+1:i+2] == "?" {
 			// escaped "??"; append it and step past
-			buf.WriteString(sp[:i+2])
+			b.WriteString(sp[:i+2])
 			sp = sp[i+2:]
 			continue
 		}
@@ -63,12 +62,12 @@ func (e expr) ToSql() (sql string, args []any, err error) {
 		if as, ok := ap[0].(Sqlizer); ok {
 			// sqlizer argument; expand it and append the result
 			isql, iargs, err = nestedToSql(as)
-			buf.WriteString(sp[:i])
-			buf.WriteString(isql)
+			b.WriteString(sp[:i])
+			b.WriteString(isql)
 			args = append(args, iargs...)
 		} else {
 			// normal argument; append it and the placeholder
-			buf.WriteString(sp[:i+1])
+			b.WriteString(sp[:i+1])
 			args = append(args, ap[0])
 		}
 
@@ -78,8 +77,8 @@ func (e expr) ToSql() (sql string, args []any, err error) {
 	}
 
 	// append the remaining sql and arguments
-	buf.WriteString(sp)
-	return buf.String(), append(args, ap...), err
+	b.WriteString(sp)
+	return b.String(), append(args, ap...), err
 }
 
 type concatExpr []any
