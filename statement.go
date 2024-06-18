@@ -31,6 +31,11 @@ func (b StatementBuilderType) Delete(from string) DeleteBuilder {
 	return DeleteBuilder(b).From(from)
 }
 
+// With returns a WithBuilder for this StatementBuilderType.
+func (b StatementBuilderType) With() WithBuilder {
+	return WithBuilder(b)
+}
+
 // PlaceholderFormat sets the PlaceholderFormat field for any child builders.
 func (b StatementBuilderType) PlaceholderFormat(f PlaceholderFormat) StatementBuilderType {
 	return builder.Set(b, "PlaceholderFormat", f).(StatementBuilderType)
@@ -80,6 +85,11 @@ func Update(table string) UpdateBuilder {
 // See DeleteBuilder.Table.
 func Delete(from string) DeleteBuilder {
 	return StatementBuilder.Delete(from)
+}
+
+// With returns a new WithBuilder.
+func With() WithBuilder {
+	return StatementBuilder.With()
 }
 
 // Case returns a new CaseBuilder
