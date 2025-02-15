@@ -219,6 +219,18 @@ func TestExprNilToSql(t *testing.T) {
 	require.Equal(t, expectedSql, sql)
 }
 
+func TestNullTypeSqlizer(t *testing.T) {
+	sql, args, err := Eq{"name": Raw("null")}.ToSql()
+	require.NoError(t, err)
+	require.Empty(t, args)
+	require.Equal(t, "name IS NULL", sql)
+
+	sql, args, err = Eq{"name": "null"}.ToSql()
+	require.NoError(t, err)
+	require.Equal(t, []any{"null"}, args)
+	require.Equal(t, "name = ?", sql)
+}
+
 func TestNullTypeString(t *testing.T) {
 	var b Sqlizer
 	var name sql.NullString
