@@ -189,8 +189,12 @@ func (eq Eq) toSQL(useNotOpr bool) (sql string, args []any, err error) {
 				if err != nil {
 					return "", nil, err
 				}
-				expr = fmt.Sprintf("%s %s %s", key, equalOpr, pSql)
-				args = append(args, pArgs...)
+				if len(pArgs) == 0 && strings.EqualFold(pSql, "NULL") {
+					expr = fmt.Sprintf("%s %s NULL", key, nullOpr)
+				} else {
+					expr = fmt.Sprintf("%s %s %s", key, equalOpr, pSql)
+					args = append(args, pArgs...)
+				}
 			} else if isListType(val) {
 				valVal := reflect.ValueOf(val)
 				if valVal.Len() == 0 {
