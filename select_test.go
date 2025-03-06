@@ -75,19 +75,20 @@ func TestSelectBuilderFromSelect(t *testing.T) {
 func TestSelectBuilderFromSelectNestedDollarPlaceholders(t *testing.T) {
 	subQ := Select("c").
 		From("t").
-		Where(Gt{"c": 1}).
+		Where(Gt{"c": 2}).
 		PlaceholderFormat(Dollar)
 	b := Select("c").
+		Column(Expr("?", 1)).
 		FromSelect(subQ, "subq").
-		Where(Lt{"c": 2}).
+		Where(Lt{"c": 3}).
 		PlaceholderFormat(Dollar)
 	sql, args, err := b.ToSql()
 	require.NoError(t, err)
 
-	expectedSql := "SELECT c FROM (SELECT c FROM t WHERE c > $1) AS subq WHERE c < $2"
+	expectedSql := "SELECT c, $1 FROM (SELECT c FROM t WHERE c > $2) AS subq WHERE c < $3"
 	require.Equal(t, expectedSql, sql)
 
-	expectedArgs := []any{1, 2}
+	expectedArgs := []any{1, 2, 3}
 	require.Equal(t, expectedArgs, args)
 }
 
