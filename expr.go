@@ -108,7 +108,7 @@ func (ce concatExpr) ToSql() (sql string, args []any, err error) {
 //
 //	name_expr := Expr("CONCAT(?, ' ', ?)", firstName, lastName)
 //	ConcatExpr("COALESCE(full_name,", name_expr, ")")
-func ConcatExpr(parts ...any) concatExpr {
+func ConcatExpr(parts ...any) Sqlizer {
 	return concatExpr(parts)
 }
 
@@ -123,7 +123,7 @@ type aliasExpr struct {
 // Ex:
 //
 //	.Column(Alias(caseStmt, "case_column"))
-func Alias(expr Sqlizer, alias string) aliasExpr {
+func Alias(expr Sqlizer, alias string) Sqlizer {
 	return aliasExpr{expr, alias}
 }
 
